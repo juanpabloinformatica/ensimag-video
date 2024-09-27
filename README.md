@@ -24,6 +24,7 @@ is mostly managed by SDL2. The displayed frame is used with an
 additional thread and producer/consumer algorithms to synchronize
 stream reading and displaying.
 
+
 ## Compilation and unit testing ##
 
 The compilation process use Cmake

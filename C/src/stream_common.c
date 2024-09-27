@@ -1,6 +1,6 @@
+#include "stream_common.h"
 #include "ensitheora.h"
 #include "ensivorbis.h"
-#include "stream_common.h"
 #include "synchro.h"
 #include <assert.h>
 #include <time.h>
@@ -65,21 +65,21 @@ struct streamstate *getStreamState(ogg_sync_state *pstate, ogg_page *ppage,
 
     // ADD Your code HERE
     // proteger l'accès à la hashmap
-
+    lockHashmapMutex();
     if (type == TYPE_THEORA)
       HASH_ADD_INT(theorastrstate, serial, s);
     else
       HASH_ADD_INT(vorbisstrstate, serial, s);
+    unlockHashmapMutex();
 
   } else {
     // proteger l'accès à la hashmap
-
+    lockHashmapMutex();
     if (type == TYPE_THEORA)
       HASH_FIND_INT(theorastrstate, &serial, s);
     else
       HASH_FIND_INT(vorbisstrstate, &serial, s);
-
-    // END of your code modification HERE
+    unlockHashmapMutex();
     assert(s != NULL);
   }
   assert(s != NULL);
@@ -135,7 +135,11 @@ int decodeAllHeaders(int respac, struct streamstate *s, enum streamtype type) {
       s->headersRead = true;
 
       if (type == TYPE_THEORA) {
-	// BEGIN your modification HERE
+        // BEGIN your modification HERE
+        // int *serial = malloc(sizeof(int));
+        // *serial = s->serial;
+        printf("i enter here");
+        pthread_create(&showThread, NULL, draw2SDL, &s->serial);
         // lancement du thread gérant l'affichage (draw2SDL)
         // inserer votre code ici !!
         // END of your modification

@@ -1,5 +1,8 @@
+#include "ensivideo.h"
+#include "synchro.h"
 #include <SDL2/SDL.h>
 #include <assert.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -21,19 +24,34 @@ int main(int argc, char *argv[]) {
   assert(res == 0);
 
   // Your code HERE
+  // everything is defined in synchro.h
+  ptrFileName = argv[1];
+  initMonitors();
+  initHashmapMutex();
+  printf("%s", ptrFileName);
   // start the two stream readers (theoraStreamReader and vorbisStreamReader)
   // each in a thread
-  
-  // wait for vorbis thread
+  pthread_create(&threadAudioVorbis, NULL, vorbisStreamReader, ptrFileName);
+  pthread_create(&threadVideoTheora, NULL, theoraStreamReader, ptrFileName);
+  // // wait for vorbis thread
+  pthread_join(threadAudioVorbis, NULL);
 
   // 1 seconde of sound in advance, thus wait 1 seconde
   // before leaving
   sleep(1);
 
   // Wait for theora and theora2sdl threads
-
+  // pthread_cancel()
+  // pthread_cancel()
+  //
+  pthread_join(threadVideoTheora, NULL);
+  pthread_join(showThread, NULL);
+  // SDL_Quit();
   // TODO
   /* liberer des choses ? */
+  destroyHashmapMutex();
+  destroyMonitors();
 
+  // printf("is here");
   exit(EXIT_SUCCESS);
 }

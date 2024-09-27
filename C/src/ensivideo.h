@@ -3,6 +3,8 @@
 
 #include "uthash.h"
 #include <ogg/ogg.h>
+
+#include <pthread.h>
 #include <stdbool.h>
 #include <theora/theora.h>
 #include <theora/theoradec.h>

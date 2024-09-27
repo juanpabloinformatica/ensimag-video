@@ -14,7 +14,7 @@ set(CMAKE_BUILD_TYPE Debug)
 #########
 # Vous devez editer les lignes suivantes pour y mettre vos logins
 #########
-set(LOGINS login1 login2 login3)
+set(LOGINS pradamej)
 
 # Vérification du renseignement des login
 list(SORT LOGINS)
@@ -51,7 +51,7 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${ALLSTRIP_PKG_CFLAGS} -Wall -We
 # les ajouter ici
 ##
 
-add_executable(ensivideo src/ensivideo.c src/ensitheora.c src/ensivorbis.c src/oggstream.c src/stream_common.c src/synchro.c)
+add_executable(ensivideo src/ensivideo.c src/ensitheora.c src/ensivorbis.c src/oggstream.c src/stream_common.c src/synchro.c )
 
 target_link_libraries(ensivideo pthread ${ALLSTRIP_PKG_LDFLAGS})
 

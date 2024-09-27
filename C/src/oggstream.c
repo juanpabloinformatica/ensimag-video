@@ -10,11 +10,12 @@ ogg_sync_state oggtheorastate,
     oggvorbisstate; /* sync and verify incoming physical bitstream */
 ogg_page theorapage,
     vorbispage; /* one Ogg bitstream page. Vorbis packets are inside */
-
 void *theoraStreamReader(void *arg) {
+  printf("[THEORA] inside");
   char *filename = (char *)arg;
 
   FILE *vf = fopen(filename, "r");
+  // printf("[THEORA] inside");
   assert(vf);
 
   // Initialisation de l'automate OGG
@@ -73,9 +74,10 @@ void *vorbisStreamReader(void *arg) {
   char *filename = (char *)arg;
 
   FILE *vf = fopen(filename, "r");
+  printf("[VORBIS] inside");
   assert(vf);
-
   // Initialisation de l'automate OGG
+  // keep track of the search for the page data
   int res = ogg_sync_init(&oggvorbisstate);
   assert(res == 0);
 
@@ -128,7 +130,6 @@ void *vorbisStreamReader(void *arg) {
       vorbis2SDL(s);
     }
   }
-
   fclose(vf);
   return 0;
 }

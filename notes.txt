@@ -1,0 +1,19 @@
+ogg -> format stockage des donnes bruts
+ogg -> pages -> paquets -> flux(stream)
+theora -> format stockage video
+vorbis -> format stockage audio
+
+-------
+ogg has everything
+    -> pages
+        -> paquets
+            -> flux(streams)
+                -> audio (vorbis)
+                -> video (theora)
+
+-------- Steps ---------
+-> read file -> data read -> ogg decoder -> page_complet-> decoder ogg -> paquet complet -> paquet to -> vorbis -> 
+                                                                                                      -> theora ->
+-> extraire du decodeur des flux les donnes -> samples
+
+                

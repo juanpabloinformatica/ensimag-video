@@ -19,10 +19,14 @@ SDL_Rect rect = {};
 struct streamstate *theorastrstate = NULL;
 
 void *draw2SDL(void *arg) {
+  printf("i enter here");
   int serial = (int)(long long int)arg;
   struct streamstate *s = NULL;
   SDL_Texture *texture = NULL;
 
+  // this one is going to be getting the packet and kind of drawing
+  // there has to be a sycronhization between this thread and the one that is
+  // creating it that will be i think theora thread
   attendreTailleFenetre();
 
   // create SDL window (if not done) and renderer
@@ -54,9 +58,9 @@ void *draw2SDL(void *arg) {
 
   // ADD Your code HERE
   /* Protéger l'accès à la hashmap */
-
+  lockHashmapMutex();
   HASH_FIND_INT(theorastrstate, &serial, s);
-
+  unlockHashmapMutex();
   // END of your modification HERE
 
   assert(s->strtype == TYPE_THEORA);
@@ -116,11 +120,13 @@ void theora2SDL(struct streamstate *s) {
     res = th_decode_ycbcr_out(s->th_dec.ctx, videobuffer);
 
     // Envoyer la taille de la fenêtre
+    // this should be first and then advertise the draw2dl
     envoiTailleFenetre(videobuffer);
 
     attendreFenetreTexture();
 
     // copy the buffer
+    printf("just here: -> %d", videobuffer[0].width);
     rect.w = videobuffer[0].width;
     rect.h = videobuffer[0].height;
     // once = true;
@@ -140,6 +146,7 @@ void theora2SDL(struct streamstate *s) {
   // copy data in the current texturedate
   for (int pl = 0; pl < 3; pl++) {
     for (int i = 0; i < videobuffer[pl].height; i++) {
+      printf("in here");
       memmove(texturedate[tex_iwri].plane[pl] + i * windowsx,
               videobuffer[pl].data + i * videobuffer[pl].stride,
               videobuffer[pl].width);
