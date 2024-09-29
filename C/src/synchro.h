@@ -3,39 +3,24 @@
 
 #include "ensitheora.h"
 #include <pthread.h>
+#include <semaphore.h>
 #include <stdbool.h>
 
 /* Les extern des variables pour la synchro ici */
-typedef struct MonitorWindow MonitorWindow;
-struct MonitorWindow {
-  pthread_cond_t windowCondition;
-  pthread_mutex_t windowMutex;
-  bool windowSet;
-};
-typedef struct MonitorTexture MonitorTexture;
-struct MonitorTexture {
-  pthread_cond_t textureCondition;
-  pthread_mutex_t textureMutex;
-  bool textureSet; // as boolean
-};
-typedef struct MonitorDebutTexture MonitorDebutTexture;
-struct MonitorDebutTexture {
-  pthread_cond_t textureDebutCondition;
-  pthread_mutex_t textureDebutMutex;
-  bool textureDebutSet; // as boolean
-};
-typedef struct MonitorFinTexture MonitorFinTexture;
-struct MonitorFinTexture {
-  pthread_cond_t textureFinCondition;
-  pthread_mutex_t textureFinMutex;
-  bool textureFinSet; // as boolean
+typedef struct Monitor Monitor;
+struct Monitor {
+  pthread_cond_t condition;
+  pthread_mutex_t mutex;
+  bool conditionAchieved;
 };
 
-extern MonitorWindow *monitorWindow;
-extern MonitorTexture *monitorTexture;
-extern MonitorDebutTexture *monitorDebutTexture;
-extern MonitorFinTexture *monitorFinTexture;
-
+extern Monitor *monitorWindow;
+extern Monitor *monitorTexture;
+extern Monitor *monitorDebutTexture;
+extern Monitor *monitorFinTexture;
+extern sem_t empty;
+extern sem_t full;
+extern pthread_mutex_t mutexTexture;
 
 // struct
 extern char *ptrFileName;
@@ -58,6 +43,12 @@ void unlockHashmapMutex();
 // 5.2 finish
 void initMonitors();
 void destroyMonitors();
+//
+void initSemaphores();
+void destroySemaphores();
+void initMutexTexture();
+void destroyMutexTexture();
+//
 
 // ---------------------
 void envoiTailleFenetre(th_ycbcr_buffer buffer);
@@ -69,7 +60,7 @@ void signalerFenetreEtTexturePrete();
 void debutConsommerTexture();
 void finConsommerTexture();
 
-void debutDeposerTexture();
-void finDeposerTexture();
+void debutDeposerTexture(int text_iwri);
+void finDeposerTexture(int text_iwri);
 
 #endif

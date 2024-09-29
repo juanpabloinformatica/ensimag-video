@@ -27,6 +27,8 @@ int main(int argc, char *argv[]) {
   // everything is defined in synchro.h
   ptrFileName = argv[1];
   initMonitors();
+  initSemaphores();
+  initMutexTexture();
   initHashmapMutex();
   printf("%s", ptrFileName);
   // start the two stream readers (theoraStreamReader and vorbisStreamReader)
@@ -50,8 +52,10 @@ int main(int argc, char *argv[]) {
   // TODO
   /* liberer des choses ? */
   destroyHashmapMutex();
+  destroyMutexTexture();
   destroyMonitors();
+  destroySemaphores();
 
-  // printf("is here");
+
   exit(EXIT_SUCCESS);
 }

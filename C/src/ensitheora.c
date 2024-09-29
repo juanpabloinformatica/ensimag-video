@@ -134,7 +134,7 @@ void theora2SDL(struct streamstate *s) {
 
   // 1 seul producteur/un seul conso => synchro sur le nb seulement
 
-  debutDeposerTexture();
+  debutDeposerTexture(tex_iwri);
 
   if (!once) {
     // for(unsigned int i = 0; i < 3; ++i)
@@ -156,5 +156,5 @@ void theora2SDL(struct streamstate *s) {
   assert(res == 0);
   tex_iwri = (tex_iwri + 1) % NBTEX;
 
-  finDeposerTexture();
+  finDeposerTexture(tex_iwri);
 }
