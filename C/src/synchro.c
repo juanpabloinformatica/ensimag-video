@@ -67,7 +67,6 @@ void attendreTailleFenetre() {
     printf("waiting for window");
     pthread_cond_wait(&monitorWindow->condition, &monitorWindow->mutex);
   }
-  monitorWindow->conditionAchieved=false;
 }
 
 void signalerFenetreEtTexturePrete() {
@@ -80,7 +79,6 @@ void attendreFenetreTexture() {
     printf("waiting for texture + window");
     pthread_cond_wait(&monitorTexture->condition, &monitorTexture->mutex);
   }
-  monitorTexture->conditionAchieved=false;
 }
 void debutConsommerTexture() {
   while (counter == 0) {
@@ -88,18 +86,16 @@ void debutConsommerTexture() {
   }
 }
 void finConsommerTexture() {
-  pthread_mutex_lock(&textureMutex);
   counter--;
   pthread_mutex_unlock(&textureMutex);
   pthread_cond_signal(&consumerAdvertiseProducer);
 }
 void debutDeposerTexture() {
-  while (counter < NBTEX - 1) {
+  while (counter > NBTEX - 1) {
     pthread_cond_wait(&consumerAdvertiseProducer, &textureMutex);
   }
 }
 void finDeposerTexture() {
-  pthread_mutex_lock(&textureMutex);
   counter++;
   pthread_mutex_unlock(&textureMutex);
   pthread_cond_signal(&producerAdvertiseConsumer);
