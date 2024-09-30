@@ -9,7 +9,6 @@ char *ptrFileName;
 // Threads
 pthread_t threadAudioVorbis;
 pthread_t threadVideoTheora;
-pthread_t showThread;
 
 // Mutex
 pthread_mutex_t hashmapMutex;
@@ -17,11 +16,11 @@ pthread_mutex_t hashmapMutex;
 // Monitors
 Monitor *monitorWindow;
 Monitor *monitorTexture;
-Monitor *monitorDebutTexture;
-Monitor *monitorFinTexture;
-sem_t empty;
-sem_t full;
-pthread_mutex_t mutexTexture;
+// last prodcuer consumer
+pthread_mutex_t textureMutex;
+pthread_cond_t producerAdvertiseConsumer;
+pthread_cond_t consumerAdvertiseProducer;
+int counter = 0;
 
 /* l'implantation des fonctions de synchro ici */
 // ------ mine -------
@@ -29,48 +28,27 @@ void initHashmapMutex() { pthread_mutex_init(&hashmapMutex, NULL); }
 void destroyHashmapMutex() { pthread_mutex_destroy(&hashmapMutex); }
 void lockHashmapMutex() { pthread_mutex_lock(&hashmapMutex); }
 void unlockHashmapMutex() { pthread_mutex_unlock(&hashmapMutex); }
+
 void initMonitors() {
   monitorWindow = malloc(sizeof(Monitor));
   monitorTexture = malloc(sizeof(Monitor));
-  monitorDebutTexture = malloc(sizeof(Monitor));
-  monitorFinTexture = malloc(sizeof(Monitor));
   pthread_cond_init(&monitorWindow->condition, NULL);
   pthread_cond_init(&monitorTexture->condition, NULL);
-  pthread_cond_init(&monitorDebutTexture->condition, NULL);
-  pthread_cond_init(&monitorFinTexture->condition, NULL);
   pthread_mutex_init(&monitorWindow->mutex, NULL);
   pthread_mutex_init(&monitorTexture->mutex, NULL);
-  pthread_mutex_init(&monitorDebutTexture->mutex, NULL);
-  pthread_mutex_init(&monitorFinTexture->mutex, NULL);
   monitorWindow->conditionAchieved = false;
   monitorTexture->conditionAchieved = false;
-  monitorDebutTexture->conditionAchieved = false;
-  monitorFinTexture->conditionAchieved = false;
 }
 void destroyMonitors() {
   pthread_cond_destroy(&monitorWindow->condition);
   pthread_cond_destroy(&monitorTexture->condition);
-  pthread_cond_destroy(&monitorDebutTexture->condition);
-  pthread_cond_destroy(&monitorFinTexture->condition);
   pthread_mutex_destroy(&monitorWindow->mutex);
   pthread_mutex_destroy(&monitorTexture->mutex);
-  pthread_mutex_destroy(&monitorDebutTexture->mutex);
-  pthread_mutex_destroy(&monitorFinTexture->mutex);
   free(monitorWindow);
   free(monitorTexture);
-  free(monitorDebutTexture);
-  free(monitorFinTexture);
 }
-void initMutexTexture() { pthread_mutex_init(&mutexTexture, NULL); }
-void destroyMutexTexture() { pthread_mutex_destroy(&mutexTexture); }
-void initSemaphores() {
-  sem_init(&empty, 0, NBTEX);
-  sem_init(&full, 0, 0);
-}
-void destroySemaphores() {
-  sem_destroy(&empty);
-  sem_destroy(&full);
-}
+void initTextureMutex() { pthread_mutex_init(&textureMutex, NULL); }
+void destroyTextureMutex() { pthread_mutex_destroy(&textureMutex); }
 
 // ------ mine -------
 void envoiTailleFenetre(th_ycbcr_buffer buffer) {
@@ -89,6 +67,7 @@ void attendreTailleFenetre() {
     printf("waiting for window");
     pthread_cond_wait(&monitorWindow->condition, &monitorWindow->mutex);
   }
+  monitorWindow->conditionAchieved=false;
 }
 
 void signalerFenetreEtTexturePrete() {
@@ -101,37 +80,27 @@ void attendreFenetreTexture() {
     printf("waiting for texture + window");
     pthread_cond_wait(&monitorTexture->condition, &monitorTexture->mutex);
   }
+  monitorTexture->conditionAchieved=false;
 }
 void debutConsommerTexture() {
-  while (monitorDebutTexture->conditionAchieved == false) {
-    pthread_cond_wait(&monitorDebutTexture->condition,
-                      &monitorDebutTexture->mutex);
+  while (counter == 0) {
+    pthread_cond_wait(&producerAdvertiseConsumer, &textureMutex);
   }
-  // sem_wait(&full);
-  // pthread_mutex_lock(&mutexTexture);
 }
-
 void finConsommerTexture() {
-  // pthread_mutex_unlock(&mutexTexture);
-  // sem_post(&empty);
+  pthread_mutex_lock(&textureMutex);
+  counter--;
+  pthread_mutex_unlock(&textureMutex);
+  pthread_cond_signal(&consumerAdvertiseProducer);
 }
-
-void debutDeposerTexture(int text_iwri) {
-  if (text_iwri > NBTEX) {
-    pthread_mutex_lock(&monitorDebutTexture->mutex);
-  } else {
-    pthread_mutex_unlock(&monitorDebutTexture->mutex);
-    pthread_cond_signal(&monitorDebutTexture->condition);
+void debutDeposerTexture() {
+  while (counter < NBTEX - 1) {
+    pthread_cond_wait(&consumerAdvertiseProducer, &textureMutex);
   }
-  // sem_wait(&empty);
-  // pthread_mutex_lock(&mutexTexture);
-  // if(){
-  //
-  // }
 }
-
-void finDeposerTexture(int text_iwri) {
-  debutDeposerTexture(text_iwri);
-  // pthread_mutex_unlock(&mutexTexture);
-  // sem_post(&full);
+void finDeposerTexture() {
+  pthread_mutex_lock(&textureMutex);
+  counter++;
+  pthread_mutex_unlock(&textureMutex);
+  pthread_cond_signal(&producerAdvertiseConsumer);
 }

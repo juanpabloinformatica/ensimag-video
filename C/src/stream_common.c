@@ -8,6 +8,7 @@
 bool fini = false;
 
 struct timespec datedebut;
+pthread_t theora2sdlthread;
 
 int msFromStart() {
   struct timespec now;
@@ -136,10 +137,8 @@ int decodeAllHeaders(int respac, struct streamstate *s, enum streamtype type) {
 
       if (type == TYPE_THEORA) {
         // BEGIN your modification HERE
-        // int *serial = malloc(sizeof(int));
-        // *serial = s->serial;
-        printf("i enter here");
-        pthread_create(&showThread, NULL, draw2SDL, &s->serial);
+        pthread_create(&theora2sdlthread, NULL, draw2SDL,
+                       (void *)(long)s->serial); // if not data lost
         // lancement du thread gérant l'affichage (draw2SDL)
         // inserer votre code ici !!
         // END of your modification

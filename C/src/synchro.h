@@ -16,18 +16,13 @@ struct Monitor {
 
 extern Monitor *monitorWindow;
 extern Monitor *monitorTexture;
-extern Monitor *monitorDebutTexture;
-extern Monitor *monitorFinTexture;
-extern sem_t empty;
-extern sem_t full;
-extern pthread_mutex_t mutexTexture;
 
 // struct
 extern char *ptrFileName;
 extern pthread_t threadAudioVorbis;
 extern pthread_t threadVideoTheora;
-extern pthread_t showThread;
 extern pthread_mutex_t hashmapMutex;
+extern int counter;
 
 // provided ensimag
 extern bool fini;
@@ -43,13 +38,9 @@ void unlockHashmapMutex();
 // 5.2 finish
 void initMonitors();
 void destroyMonitors();
+void initTextureMutex();
+void destroyTextureMutex();
 //
-void initSemaphores();
-void destroySemaphores();
-void initMutexTexture();
-void destroyMutexTexture();
-//
-
 // ---------------------
 void envoiTailleFenetre(th_ycbcr_buffer buffer);
 void attendreTailleFenetre();
@@ -60,7 +51,7 @@ void signalerFenetreEtTexturePrete();
 void debutConsommerTexture();
 void finConsommerTexture();
 
-void debutDeposerTexture(int text_iwri);
-void finDeposerTexture(int text_iwri);
+void debutDeposerTexture();
+void finDeposerTexture();
 
 #endif

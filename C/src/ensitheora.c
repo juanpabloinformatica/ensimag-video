@@ -134,7 +134,7 @@ void theora2SDL(struct streamstate *s) {
 
   // 1 seul producteur/un seul conso => synchro sur le nb seulement
 
-  debutDeposerTexture(tex_iwri);
+  debutDeposerTexture();
 
   if (!once) {
     // for(unsigned int i = 0; i < 3; ++i)
@@ -142,11 +142,9 @@ void theora2SDL(struct streamstate *s) {
     once = true;
   } else
     res = th_decode_ycbcr_out(s->th_dec.ctx, videobuffer);
-
   // copy data in the current texturedate
   for (int pl = 0; pl < 3; pl++) {
     for (int i = 0; i < videobuffer[pl].height; i++) {
-      printf("in here");
       memmove(texturedate[tex_iwri].plane[pl] + i * windowsx,
               videobuffer[pl].data + i * videobuffer[pl].stride,
               videobuffer[pl].width);
@@ -155,6 +153,5 @@ void theora2SDL(struct streamstate *s) {
   texturedate[tex_iwri].timems = framedate * 1000;
   assert(res == 0);
   tex_iwri = (tex_iwri + 1) % NBTEX;
-
-  finDeposerTexture(tex_iwri);
+  finDeposerTexture();
 }

@@ -22,13 +22,10 @@ int main(int argc, char *argv[]) {
   res = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS);
   atexit(SDL_Quit);
   assert(res == 0);
-
   // Your code HERE
   // everything is defined in synchro.h
   ptrFileName = argv[1];
   initMonitors();
-  initSemaphores();
-  initMutexTexture();
   initHashmapMutex();
   printf("%s", ptrFileName);
   // start the two stream readers (theoraStreamReader and vorbisStreamReader)
@@ -43,19 +40,13 @@ int main(int argc, char *argv[]) {
   sleep(1);
 
   // Wait for theora and theora2sdl threads
-  // pthread_cancel()
-  // pthread_cancel()
   //
   pthread_join(threadVideoTheora, NULL);
-  pthread_join(showThread, NULL);
-  // SDL_Quit();
+  pthread_join(theora2sdlthread, NULL);
   // TODO
   /* liberer des choses ? */
   destroyHashmapMutex();
-  destroyMutexTexture();
+  destroyTextureMutex();
   destroyMonitors();
-  destroySemaphores();
-
-
   exit(EXIT_SUCCESS);
 }
